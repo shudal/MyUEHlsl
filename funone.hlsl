@@ -79,6 +79,34 @@ struct Func {
         }
         return value;
     }
+    float3 hash3( float2 p ) {
+        float3 q = float3( dot(p,float2(127.1,311.7)),
+                    dot(p,float2(269.5,183.3)),
+                    dot(p,float2(419.2,371.9)) );
+        return frac(sin(q)*43758.5453);
+    }
+    float iqnoise( in float2 x, float u, float v ) {
+        float2 p = floor(x);
+        float2 f = frac(x);
+
+        float k = 1.0+63.0*pow(1.0-v,4.0);
+
+        float va = 0.0;
+        float wt = 0.0;
+        for (int j=-2; j<=2; j++) {
+            for (int i=-2; i<=2; i++) {
+                float2 g = float2(float(i),float(j));
+                float3 o = hash3(p + g)*float3(u,u,1.0);
+                float2 r = g - f + o.xy;
+                float d = dot(r,r);
+                float ww = pow( 1.-smoothstep(0.0,1.414,sqrt(d)), k );
+                va += o.z*ww;
+                wt += ww;
+            }
+        }
+
+        return va/wt;
+    }
 };
 Func func;
  
@@ -100,10 +128,19 @@ st=frac(st);
 float2 plb=float2(0.,0.);
 float2 prt=plb;
 
-prt = float2(0.,smoothstep(-1.,1.,sin(u_time/3.)));
- 
-if (func.IsInnerRect(st,plb,prt)) {
-    color=float4(x1,0.,0.,1.);
+prt = float2(0.,smoothstep(-1.,1.,sin(u_time/2.)));
+
+bool b1=func.IsInnerRect(st,plb,prt);
+
+float2 x9=st*15.;
+float2 f_st=frac(x9);
+float2 i_st=floor(x9);
+bool b2;//=func.random(x9)<prt.y;
+float x10=func.iqnoise(x9,1.,1.);
+b2=x10<prt.y;
+if (b2) {
+    float x11=smoothstep(prt.y-0.3,prt.y,x10);
+    color=float4(1.-x11,0.,0.,1.-x11);
 } else {
     color=float4(0.,0.,0.,0.);
 }
