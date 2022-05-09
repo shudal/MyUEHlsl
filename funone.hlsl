@@ -110,6 +110,7 @@ struct Func {
 };
 Func func;
  
+float2 st_ori=st;
 float4 color = float4(0.5,0.5,0.5,1.);
 
 float sca=13.;
@@ -135,13 +136,19 @@ bool b1=func.IsInnerRect(st,plb,prt);
 float2 x9=st*15.;
 float2 f_st=frac(x9);
 float2 i_st=floor(x9);
-bool b2;//=func.random(x9)<prt.y;
-float x10=func.iqnoise(x9,1.,1.);
-b2=x10<prt.y;
+
+float x13=func.noise(x9);
+float x10=func.iqnoise(x9,1.,1.); 
+bool b2=x13<prt.y;
+//b2=x10<prt.y;
 if (b2) {
     float x11=smoothstep(prt.y-0.3,prt.y,x10);
     color=float4(1.-x11,0.,0.,1.-x11);
 } else {
     color=float4(0.,0.,0.,0.);
 }
+
+//float x12=func.noise(st_ori*15.);
+//x12=func.iqnoise(st_ori*15.,1.,1.);
+//color=float4(x12,x12,x12,1.);
 return color; 
