@@ -114,52 +114,19 @@ struct Func {
 Func func;
  
 float2 st_ori=st;
-float4 color = float4(0.5,0.5,0.5,1.);
+float4 color = float4(0.8,0.8,0.8,1.);
 
-float sca=13.;
-float x8=u_time;
-float x1= func.fbm(st*sca + x8);
-float x2= func.fbm(st*sca+10. +x8);
-
-
-float x5=0.05;
-float x6=lerp(-x5,x5,x1);
-float x7=lerp(-x5,x5,x2);
-
-st = st + float2(x6,x7);
-st=frac(st);
-
-float2 plb=float2(0.,0.);
+float x1=13.;
+st *= x1;
+float2 fst=frac(st);
+float x2=0.05;
+float2 plb=float2(x2,x2);
 float2 prt=plb;
-
-
-if (startFadeTime > 0.001) {
-    float x15=u_time-startFadeTime;
-    
-    prt = float2(0.,smoothstep(-1.,1.,sin(x15/2.)));
-    if (x15>PI/2.) {
-        prt.y=1.;
-    }
-
-
-    bool b1=func.IsInnerRect(st,plb,prt);
-
-    float2 x9=st*15.;
-    float2 f_st=frac(x9);
-    float2 i_st=floor(x9);
-
-    float x13=func.noise(x9);
-    float x10=func.iqnoise(x9,1.,1.); 
-    bool b2=x13<prt.y;
-    //b2=x10<prt.y;
-    if (b2) {
-        float x11=smoothstep(prt.y-0.3,prt.y,x10);
-        color=float4(oriColor,1.-x11);
-    } else {
-        color=float4(0.,0.,0.,0.);
-    }
- 
-    return color; 
-} else {
-    return float4(oriColor,1.);
+if (func.IsInnerRect(fst,plb,prt)==false) {
+    color.xyz=func.HSVtoRGB(float3(func.iqnoise(st,1.,1.),1.,1.));
 }
+
+return color;
+
+
+ 

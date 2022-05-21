@@ -1,0 +1,19 @@
+float3 oriColor=SceneTextureLookup(GetDefaultSceneTextureUV(Parameters, 14), 14, false).rgb;
+float3 ans=oriColor.rgb;   
+float nowDep=SceneTextureLookup(GetDefaultSceneTextureUV(Parameters, 1), 1,false).x;
+float customDep=SceneTextureLookup(GetDefaultSceneTextureUV(Parameters, 13), 13, false).x; 
+if (nowDep+1 > customDep) {   
+    float3 diffColor=SceneTextureLookup(GetDefaultSceneTextureUV(Parameters, 2), 2, false).rgb;
+
+    float3 oriColorGray=dot(oriColor,float3(0.3,0.59,0.11));
+    float3 diffColorGray=dot(diffColor,float3(0.3,0.59,0.11));
+
+    float3 divX=oriColorGray/diffColorGray;
+    divX = clamp(divX,0,1);
+
+    float3 col=Texture2DSample(texLut, texLutSampler, divX.xy);
+    col = col * diffColor.rgb;
+
+    ans=col;
+}
+return ans;
