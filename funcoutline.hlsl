@@ -19,6 +19,8 @@ if (nowDep+1 > customDep) {
         }
     } 
 
+    float wDep=totalDis;
+
     totalDis = abs(totalDis);
     
     float2 oriCompUVForNormal=GetDefaultSceneTextureUV(Parameters, 8); 
@@ -32,17 +34,13 @@ if (nowDep+1 > customDep) {
             totalDisVec = totalDisVec + oriCompNor - SceneTextureLookup(float2(subx,suby), 8, false).xyz;
         }
     } 
+    float3 wNor=totalDisVec;
+
     totalDis = abs(totalDis);
     totalDis = totalDis+length(totalDisVec);
     totalDis=pow(totalDis,2);
-    ans=lerp(oriColor.rgb,float3(0,0,0),totalDis); 
-
-    float alpha2=0; 
-    #define PI 3.1415926
-    float tmpx=0.001*nowDep; 
-    alpha2 = min(cos(PI * tmpx / 2),1-abs(tmpx));
-    alpha2 = clamp(alpha2,0,1);
-    alpha2 = pow(alpha2,2);
-    ans=lerp(oriColor.rgb,ans,alpha2);
+    
+    ans=lerp(ans,float3(0,0,0),clamp(-1+wDep/-100,0,1));
+    ans=lerp(ans,float3(0,0,0),clamp(length(wNor)/2,0,1)); 
 }
 return ans;
