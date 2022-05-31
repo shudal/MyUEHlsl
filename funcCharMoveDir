@@ -134,21 +134,46 @@ Func func;
 
 
 float3 dir=vecDir.xyz;
-float x=func.drawCycle(st,float2(0.5,0.5),0.4,0.1);
+const float cirR=0.4;
+const float cirWid=.05;
+const float2 cirOri=float2(0.5,.5);
+
+float x=0;
+float dis=distance(st,cirOri);
+float r=cirR;
+float outHalfWid=cirWid; 
+float2 ori=cirOri;
+if (dis < (r+outHalfWid) && dis > (r-outHalfWid)) { 
+    float2 n = normalize(st-ori);
+    float tmpx=abs(smoothstep(ori+(r - outHalfWid)*n ,ori+(r +outHalfWid)*n,st) - 0.5)*2.;
+    float2 x1 = float2(tmpx,tmpx);
+    x1 = 1.0 - x1;
+    
+    x=x1.x*x1.y;
+    x=pow(x,2); 
+} 
 
 
-
-float2 cuv=st-float2(0.5,0.5);
+float2 cuv=st-cirOri;
 float closex=dot(normalize(cuv),dir);
-float tmpx3=smoothstep(0.99,1,closex);
+float mysinx=sin(acos(closex));
+
+float tmpx3=smoothstep(0.5,1,closex);
+float rDir=0.5;
+float tmp4=smoothstep(0,distance(rDir*dir,cuv*closex) ,length(cuv)*mysinx );
+
+tmpx3 *= (1-tmp4);
 
 float4 ans=float4(0,0,0,0);
 
-ans = ans+float4(x,x,x,x);
+ans = ans+float4(1,1,1,x);
 
-if (length(cuv)<0.4) { 
-    ans += float4(tmpx3,tmpx3,tmpx3,tmpx3);
+float lenCuv=length(cuv);
+if (lenCuv>cirR && lenCuv<rDir) { 
+    tmpx3=pow(tmpx3,2);
+    ans += float4(1,1,1,tmpx3);
 } 
- 
+
+//ans = float4(tmp4,tmp4,tmp4,tmp4);
 return ans;
 
