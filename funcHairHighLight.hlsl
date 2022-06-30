@@ -4,7 +4,7 @@ const float3 specularColor2=float3(0.685,0.685,0.685);
 const float3 lightColor=float3(1,1,1);
 const float primaryShift=.1;
 const float secondaryShift=.05;
-const float specExp1=10000;
+const float specExp1=1000;
 const float specExp2=100;
 struct Func {
     float fRand(float x, float time) {
@@ -134,17 +134,18 @@ struct Func {
     {
         // shift tangents
         //float shiftTex = tex2D(tSpecShift, uv) - 0.5;
-        //float shiftTex = Texture2DSample(tSpecShift, tSpecShiftSampler, uv);
-        float shiftTex=0;
+        float shiftTex = Texture2DSample(tSpecShift, tSpecShiftSampler, uv)-0.5;
+        //float shiftTex=0;
         float3 t1 = ShiftTangent(tangent, normal, primaryShift + shiftTex);
         float3 t2 = ShiftTangent(tangent, normal, secondaryShift + shiftTex);
 
         // diffuse lighting
-        float tmpx1=saturate(lerp(0.25, 1.0, dot(normal, lightVec)));
-        float3 diffuse = float3(tmpx1,tmpx1,tmpx1);
+        //float tmpx1=saturate(lerp(0.25, 1.0, dot(normal, lightVec))); 
+        //float3 diffuse = float3(tmpx1,tmpx1,tmpx1);
 
         // specular lighting
         float3 specular = specularColor1 * StrandSpecular(t1, viewVec, lightVec, specExp1);
+        float3 spec1=specular;
         // add second specular term
         //float specMask = tex2D(tSpecMask, uv); 
         float specMask = 1;
@@ -152,10 +153,14 @@ struct Func {
 
         // Final color
         float4 o;
-        o.rgb = (diffuse + specular) * Texture2DSample(tBase, tBaseSampler,uv) * lightColor;
+        //o.rgb = (diffuse + specular) * Texture2DSample(tBase, tBaseSampler,uv) * lightColor;
+        //o.rgb = (diffuse + specular) * Texture2DSample(tBase, tBaseSampler,uv) * lightColor;
+        //o.rgb += spec1;
+        //o.rgb *= float3(0.2f, 0.3f, 0.62f);//(0.2f, 0.3f, 0.62f, 1f)
+        o.rgb = (specular) * Texture2DSample(tBase, tBaseSampler,uv) * lightColor;
         //o.rgb *= ambOcc; 
         //o.a = tex2D(tAlpha, uv);
-        o.a=1;
+        o.a=specular.x;
         return o;
     }
 };

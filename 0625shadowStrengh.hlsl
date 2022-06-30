@@ -1,3 +1,7 @@
+const float shadowwid=.02;
+const float noiselen=.01;
+const float shadowTargetRidius=.025;
+const float shadowOriginRidius=.04;
 struct Func {
     float fRand(float x, float time) {
         return abs(sin(time/3+x));
@@ -133,50 +137,43 @@ struct Func {
 Func func;
 
 
-float3 dir=vecDir.xyz;
-const float cirR=0.4;
-const float cirWid=.05;
-const float2 cirOri=float2(0.5,.5);
 
-float x=0;
-float dis=distance(st,cirOri);
-float r=cirR;
-float outHalfWid=cirWid; 
-float2 ori=cirOri;
-if (dis < (r+outHalfWid) && dis > (r-outHalfWid)) { 
-    float2 n = normalize(st-ori);
-    float tmpx=abs(smoothstep(ori+(r - outHalfWid)*n ,ori+(r +outHalfWid)*n,st) - 0.5)*2.;
-    float2 x1 = float2(tmpx,tmpx);
-    x1 = 1.0 - x1;
-    
-    x=x1.x*x1.y;
-    x=pow(x,2); 
+float3 dir=vecDir.xyz;  
+dir = normalize(dir);
 
-    x = x * smoothstep(0.0125,0.035,abs(st.y-0.5));
-    x = x * smoothstep(0.0125,0.035,abs(st.x-0.5));
-} 
-
-
-float2 cuv=st-cirOri;
-float closex=dot(normalize(cuv),dir);
-float mysinx=sin(acos(closex));
-
-float tmpx3=smoothstep(0.5,1,closex);
-float rDir=0.5;
-float tmp4=smoothstep(0,distance(rDir*dir,cuv*closex) ,length(cuv)*mysinx );
-
-tmpx3 *= (1-tmp4);
-
+float2 ori=float2(.5,.5);
+float x=0;  
 float4 ans=float4(0,0,0,0);
 
-ans = ans+float4(1,1,1,x);
+if (slen > 0 && length(dir)>0)  { 
+    st = st + lerp(-noiselen,noiselen,func.noise(st*20+utime));
 
-float lenCuv=length(cuv);
-if (lenCuv>cirR+cirWid/2 && lenCuv<rDir) { 
-    tmpx3=pow(tmpx3,2);
-    ans += float4(1,1,1,tmpx3);
-} 
+    float l1=length(st-ori);
+    float slendived=slen/swid;
+    float x2= 1 - step(slendived,l1);
+    x=x2;
 
-//ans = float4(tmp4,tmp4,tmp4,tmp4);
+
+    float sintodir=sqrt(1-pow(dot(dir,normalize(st-ori)),2));
+    float lentodir=length(st-ori)*sintodir;
+    if (lentodir>shadowwid) {
+        x=0;
+    }
+ 
+    if (dot(dir,st-ori)<0) {
+        x=0;
+    }
+    if (length(st-ori-slendived*dir)<shadowTargetRidius) {
+        x=1;
+    }
+    if (length(st-ori)<shadowOriginRidius) {
+        x=1;
+    }
+
+    ans = ans+float4(x,x,x,x);
+}
+
+ 
+ 
 return ans;
 

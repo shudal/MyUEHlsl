@@ -14,9 +14,6 @@ struct Func {
         float3 RGB = HUEtoRGB(HSV.x);
         return ((RGB - 1) * HSV.y + 1) * HSV.z;
     }
-    float3 hsb2rgb(in float3 hsv) {
-        return HSVtoRGB(hsv);
-    }
     float random(float x) {
         return frac(sin(x)*100000.0);
     }
@@ -109,74 +106,21 @@ struct Func {
         }
 
         return va/wt;
-    }
-    float drawCycle(float2 st, float2 ori, float r, float outHalfWid) {
-        float dis=distance(st,ori);
-        
-        if (dis < (r+outHalfWid) && dis > (r-outHalfWid)) { 
-            //gl_FragColor = vec4(hsb2rgb(float3(f1(dis),f1(1.),f1(1.))),1.);
-            float2 n = normalize(st-ori);
-            float tmpx=abs(smoothstep(ori+(r - outHalfWid)*n ,ori+(r +outHalfWid)*n,st) - 0.5)*2.;
-            float2 x1 = float2(tmpx,tmpx);
-            x1 = 1.0 - x1;
-            
-            return x1.x*x1.y; 
-            
-        } 
-        return 0.;
-    }
-
+    } 
 };
 
 #define PI 3.14159265359
 #define TWO_PI 6.28318530718
 Func func;
 
+float x1=func.noise(st*30 + utime);
+x1 = lerp(-0.2,0.2,x1);
 
-float3 dir=vecDir.xyz;
-const float cirR=0.4;
-const float cirWid=.05;
-const float2 cirOri=float2(0.5,.5);
+float3 ans=float3(.8,.8,.8);
+if (st.x + x1 < percent) { 
+    ans=float3(1,0,0);
+} else {
 
-float x=0;
-float dis=distance(st,cirOri);
-float r=cirR;
-float outHalfWid=cirWid; 
-float2 ori=cirOri;
-if (dis < (r+outHalfWid) && dis > (r-outHalfWid)) { 
-    float2 n = normalize(st-ori);
-    float tmpx=abs(smoothstep(ori+(r - outHalfWid)*n ,ori+(r +outHalfWid)*n,st) - 0.5)*2.;
-    float2 x1 = float2(tmpx,tmpx);
-    x1 = 1.0 - x1;
-    
-    x=x1.x*x1.y;
-    x=pow(x,2); 
+}
 
-    x = x * smoothstep(0.0125,0.035,abs(st.y-0.5));
-    x = x * smoothstep(0.0125,0.035,abs(st.x-0.5));
-} 
-
-
-float2 cuv=st-cirOri;
-float closex=dot(normalize(cuv),dir);
-float mysinx=sin(acos(closex));
-
-float tmpx3=smoothstep(0.5,1,closex);
-float rDir=0.5;
-float tmp4=smoothstep(0,distance(rDir*dir,cuv*closex) ,length(cuv)*mysinx );
-
-tmpx3 *= (1-tmp4);
-
-float4 ans=float4(0,0,0,0);
-
-ans = ans+float4(1,1,1,x);
-
-float lenCuv=length(cuv);
-if (lenCuv>cirR+cirWid/2 && lenCuv<rDir) { 
-    tmpx3=pow(tmpx3,2);
-    ans += float4(1,1,1,tmpx3);
-} 
-
-//ans = float4(tmp4,tmp4,tmp4,tmp4);
 return ans;
-

@@ -13,7 +13,7 @@ if (nowDep+1 > customDep) {
 
     float3 col=Texture2DSample(texLut, texLutSampler, divX.xy);
     col = col * diffColor.rgb;
-
+    //col = col * oriColor.rgb;
     ans=col;
 }
 return ans;
